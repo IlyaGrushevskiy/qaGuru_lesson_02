@@ -1,109 +1,79 @@
 package tests;
 
-import com.codeborne.selenide.Configuration;
-import com.codeborne.selenide.SelenideElement;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
+import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Selenide.*;
 
 public class Lesson_2 {
 
-    SelenideElement inputFirstName = $x("//input[@id='firstName']");
-    SelenideElement inputLastName = $x("//input[@id='lastName']");
-    SelenideElement inputUserEmail = $x("//input[@id='userEmail']");
-    SelenideElement inputUserNumber = $x("//input[@id='userNumber']");
-
-    SelenideElement textareaCurrentAddress = $x("//textarea[@id='currentAddress']");
-
-    SelenideElement buttonSubmit = $x("//button[@id='submit']");
-
-    String state, city;
-    String firstName = "Ivan";
-    String lastName = "Ivanov";
-    String userEmail = "IvanovEmail@gmail.com";
-    String gender = "Male";
-    String userNumber = "9997778888";
-    String dateOfBirth = "6 Jul 1988";
-    String subjects = "English";
-    String hobbies = "Sports";
-    String currentAddress = "Moscow, Arbat";
-
-    void selectGender(String gender) {
-        $x("//input[@id='gender-radio-1']/following-sibling::label[text()='"+gender+"']").click();
-    }
-
-    void selectAutoCompleteInput(String text) {
-        $x("//input[@id='subjectsInput']").setValue(text);
-        $x("//input[@id='subjectsInput']").pressEnter();
-    }
-
-    void setCheckBox(String text) {
-        $x("//input[@id='hobbies-checkbox-1']/following-sibling::label[text()='"+text+"']").click();
-    }
-
-    void reactSelect() {
-        $x("//div[@id='state']").scrollTo().click();
-        $x("//div[contains(@id,'react-select-3')]").click();
-        state = $x("//div[@id='state']//div[contains(@class,'singleValue')]").getText();
-        $x("//div[@id='city']").click();
-        $x("//div[contains(@id,'react-select-4')]").click();
-        city = $x("//div[@id='city']//div[contains(@class,'singleValue')]").getText();
-    }
-
-    void inputDate(String date) {
-        String[] dateArray = date.split(" ");
-        $x("//input[@id='dateOfBirthInput']").click();
-        $x("//select[contains(@class,'year')]/option[text()='" + dateArray[2] + "']").click();
-        $x("//select[contains(@class,'month')]/option[contains(text(),'" + dateArray[1] + "')]").click();
-        $x("//div[contains(@class,'datepicker') and text()='"+dateArray[0]+"']").click();
-    }
-
-    void checkingValues(String tableRow, String checkingValue) {
-        if (tableRow.toLowerCase().contains("date")) {
-            String[] dateArray = checkingValue.split(" ");
-            for (String s : dateArray) {
-                String value = $x("//td[text()='" + tableRow + "']/following-sibling::td").getText();
-                Assertions.assertTrue(value.contains(s), "ОШИБКА: " + value + " не содержит " + s + " !");
-            }
-        } else {
-            String value = $x("//td[text()='" + tableRow + "']/following-sibling::td").getText();
-            Assertions.assertEquals(value, checkingValue, "ОШИБКА: " + value + " не равно " + checkingValue + " !");
-        }
-    }
-
-    @BeforeAll
-    static void setup() {
-        Configuration.startMaximized = true;
-    }
+    String firstName = "Ivan",
+            lastName = "Ivanov",
+            userEmail = "IvanovEmail@gmail.com",
+            gender = "Male",
+            userNumber = "9997778888",
+            dateOfBirthDay = "6",
+            dateOfBirthMonth = "July",
+            dateOfBirthYear = "1988",
+            subject1 = "English",
+            subject2 = "Economics",
+            hobby1 = "Sports",
+            hobby2 = "Reading",
+            hobby3 = "Music",
+            picture = "1.png",
+            currentAddress = "Moscow, Arbat",
+            state = "Uttar Pradesh",
+            city = "Merrut";
 
     @Test
-    public void practiceForm() {
+    public void fillingRegistrationForm() {
 
+        // открываем регистрационную форму
         open("https://demoqa.com/automation-practice-form");
+        $x("//div[@class='practice-form-wrapper']").shouldHave(text("Student Registration Form"));
 
-        inputFirstName.setValue(firstName);
-        inputLastName.setValue(lastName);
-        inputUserEmail.setValue(userEmail);
-        selectGender(gender);
-        inputUserNumber.setValue(userNumber);
-        inputDate(dateOfBirth);
-        selectAutoCompleteInput(subjects);
-        setCheckBox(hobbies);
-        textareaCurrentAddress.setValue(currentAddress);
-        reactSelect();
+        // заполняем регистрационную форму
+        $x("//input[@id='firstName']").val(firstName);
+        $x("//input[@id='lastName']").val(lastName);
+        $x("//input[@id='userEmail']").val(userEmail);
+        $x("//input[@name='gender'][@value='"+gender+"']/following-sibling::label").click();
+        $x("//input[@id='userNumber']").val(userNumber);
 
-        buttonSubmit.hover().click();
+        $x("//input[@id='dateOfBirthInput']").click();
+        if (dateOfBirthDay.length() == 1) dateOfBirthDay = "0" + dateOfBirthDay;
+        $x("//select[@class='react-datepicker__year-select']").selectOption(dateOfBirthYear);
+        $x("//select[@class='react-datepicker__month-select']").selectOption(dateOfBirthMonth);
+        $x("//div[contains(@class,'react-datepicker__day--0"+dateOfBirthDay+"')]").click();
 
-        checkingValues("Student Name", firstName+" "+lastName);
-        checkingValues("Student Email", userEmail);
-        checkingValues("Gender", gender);
-        checkingValues("Mobile", userNumber);
-        checkingValues("Date of Birth", dateOfBirth);
-        checkingValues("Subjects", subjects);
-        checkingValues("Hobbies", hobbies);
-        checkingValues("Address", currentAddress);
-        checkingValues("State and City", state + " " + city);
+        $x("//input[@id='subjectsInput']").val(subject1).pressEnter();
+        $x("//input[@id='subjectsInput']").val(subject2).pressEnter();
+
+        $x("//div[@id='hobbiesWrapper']//label[text()='"+hobby1+"']").click();
+        $x("//div[@id='hobbiesWrapper']//label[text()='"+hobby2+"']").click();
+        $x("//div[@id='hobbiesWrapper']//label[text()='"+hobby3+"']").click();
+
+        $x("//input[@id='uploadPicture']").uploadFromClasspath("img/" + picture);
+
+        $x("//textarea[@id='currentAddress']").val(currentAddress);
+
+        $x("//div[@id='state']").click();
+        $x("//div[contains(@id,'react-select')][text()='"+state+"']").click();
+        $x("//div[@id='city']").click();
+        $x("//div[contains(@id,'react-select')][text()='"+city+"']").click();
+
+        // сохраняем форму
+        $x("//button[@id='submit']").click();
+        $x("//div[@id='example-modal-sizes-title-lg']").shouldHave(text("Thanks for submitting the form"));
+
+        // проверяем форму
+        $x("//td[text()='Student Name']").parent().shouldHave(text(firstName + " " + lastName));
+        $x("//td[text()='Student Email']").parent().shouldHave(text(userEmail));
+        $x("//td[text()='Gender']").parent().shouldHave(text(gender));
+        $x("//td[text()='Mobile']").parent().shouldHave(text(userNumber));
+        $x("//td[text()='Date of Birth']").parent().shouldHave(text(dateOfBirthDay + " " + dateOfBirthMonth + "," + dateOfBirthYear));
+        $x("//td[text()='Subjects']").parent().shouldHave(text(subject1 + ", " + subject2));
+        $x("//td[text()='Hobbies']").parent().shouldHave(text(hobby1 + ", " + hobby2 + ", " + hobby3));
+        $x("//td[text()='Picture']").parent().shouldHave(text(picture));
+        $x("//td[text()='Address']").parent().shouldHave(text(currentAddress));
+        $x("//td[text()='State and City']").parent().shouldHave(text(state + " " + city));
     }
 }
